@@ -1,0 +1,27 @@
+# tasks/main.yml
+---
+- name: Install Apache
+  ansible.builtin.apt:
+    name: apache2
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Deploy custom index.html with server_name
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Deploy Apache configuration
+  ansible.builtin.template:
+    src: apache2.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+  notify: Restart Apache
+
+- name: Start and enable Apache
+  ansible.builtin.service:
+    name: apache2
+    state: started
+    enabled: yes
